@@ -1,118 +1,106 @@
 import Player from "./components/Player";
 import GameBoard from "./components/GameBoard";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Log from "./components/Log";
-import { WINNING_COMBINATIONS } from "./winning-combinations";
 import GameOver from "./components/GameOver";
+import axios from "axios";
 
 const PLAYERS = {
   X: 'Player 1',
-  O: 'Player 2'
+  O: 'AI'
 };
 
-const INITIAL_GAMEBOARD = [
-	[null, null, null],
-	[null, null, null],
-	[null, null, null],
-];
-
-function deriveActivePlayer(gameTurns) {
-  let currentPlayer = 'X';
-      
-  if (gameTurns.length > 0 && gameTurns[0].player === 'X') {
-    currentPlayer = 'O';
-  }
-  return currentPlayer;
-}
-
-function deriveWinner(gameBoard, players) {
-  let winner = null;
-
-  for (const combination of WINNING_COMBINATIONS) {
-    const firstSquareSymbol =
-      gameBoard[combination[0].row][combination[0].col]
-    const secondSquareSymbol =
-      gameBoard[combination[1].row][combination[1].col]
-    const thirdSquareSymbol =
-      gameBoard[combination[2].row][combination[2].col]
-
-    if (
-      firstSquareSymbol &&
-      firstSquareSymbol === secondSquareSymbol &&
-      firstSquareSymbol === thirdSquareSymbol
-    ) {
-      winner = players[firstSquareSymbol];
-    }
-  }
-    return winner;
-}
-
-function deriveGameBoard(gameTurns) {
-  let gameBoard = [...INITIAL_GAMEBOARD.map(array => [...array])];
-
-	for (const turn of gameTurns) {
-		const { square, player } = turn;
-		const { row, col } =  square;
-		
-		gameBoard[row][col] = player;
-	}
-  return gameBoard;
-}
+const INITIAL_GAMEBOARD = Array(3).fill(Array(3).fill(null));
 
 function App() {
-  const [players, setPlayers]= useState(PLAYERS)
+  const [players, setPlayers] = useState(PLAYERS);
   const [gameTurns, setGameTurns] = useState([]);
+  const [gameBoard, setGameBoard] = useState(() => JSON.parse(JSON.stringify(INITIAL_GAMEBOARD)));
+  const [activePlayer, setActivePlayer] = useState('X');
+  const [winner, setWinner] = useState(null);
+  const [hasDraw, setHasDraw] = useState(false);
 
-  const activePlayer = deriveActivePlayer(gameTurns);
-  const gameBoard = deriveGameBoard(gameTurns);
-  const winner = deriveWinner(gameBoard, players);
-  const hasDraw = gameTurns.length === 9 && !winner;
+  const resetGame =  async () => {
+    try {
+      await axios.post("http://127.0.0.1:8000/reset");
+      setGameBoard(JSON.parse(JSON.stringify(INITIAL_GAMEBOARD)));
+      setGameTurns([]);
+      setWinner(null);
+      setHasDraw(false);
+      setActivePlayer('X');
+    } catch (error) {
+      console.error("Error resetting game:", error);
+    }
+  };
 
-  function handleSelectSquare(rowIndex, colIndex) {
-    setGameTurns((prevTurns) => {
-      const currentPlayer = deriveActivePlayer(prevTurns);
+  const handlePlayerMove = (row, col, player) => {
+    setGameBoard((prevBoard) =>
+      prevBoard.map((r, rIdx) => rIdx === row ? r.map((cell, cIdx) => (cIdx === col ? player : cell)) : r)
+    );
+    setGameTurns((prevTurns) => [
+      { square: { row, col }, player },
+      ...prevTurns,
+    ]);
+  };
 
-      const updatedTurns = [
-        {square: { row: rowIndex, col: colIndex }, player: currentPlayer},
-        ...prevTurns
-      ];
+  // Handle player move and communicate with backend
+  const handleSelectSquare = async (rowIndex, colIndex) => {
+    if (gameBoard[rowIndex][colIndex] || winner || hasDraw) return;
 
-      return updatedTurns;
-    });
-  }
+    handlePlayerMove(rowIndex, colIndex, 'X');
+    setActivePlayer('O');
 
-  function handleRestart() {
-    setGameTurns([]);
-  }
+    try {
+      const { data } = await axios.post("http://127.0.0.1:8000/play", {
+        row: rowIndex,
+        column: colIndex
+      });
+      const { ai_move, winner, game_over } = data;
+      if (winner != 'AI') setWinner(winner);
+      if (game_over) setHasDraw(!winner && game_over);
+
+      setActivePlayer('O');
+    
+      if (ai_move) {
+        setTimeout(() => {
+          handlePlayerMove(ai_move[0], ai_move[1], 'O');
+          if (winner) setWinner(winner);
+          if (!winner && !game_over) setActivePlayer('X');
+        }, 500);
+      }
+
+    } catch (error) {
+      console.error("Error sending player move to server:", error);
+    }
+  };
 
   function handlePlayerNameChange(symbol, newName) {
-    setPlayers(prevPlayers => {
-      return {
-        ...prevPlayers,
-        [symbol]: newName
-      };
-    });
+    setPlayers((prevPlayers) => ({
+      ...prevPlayers,
+      [symbol]: newName
+    }));
   }
+
+  useEffect(() => {
+    resetGame();
+  }, []);
 
   return (
     <main>
       <div id="game-container">
         <ol id="players" className="highlight-player">
-          <Player 
-            initialName={PLAYERS.X}
-            symbol="X"
-            isActive={activePlayer === 'X'} 
-            onChangeName={handlePlayerNameChange}
-          />
-          <Player
-            initialName={PLAYERS.O}
-            symbol="O"
-            isActive={activePlayer === 'O'}
-            onChangeName={handlePlayerNameChange}
-          />
+          {Object.keys(PLAYERS).map((symbol) => (
+            <Player
+              key={symbol}
+              initialName={PLAYERS[symbol]}
+              symbol={symbol}
+              isActive={activePlayer === symbol}
+              onChangeName={handlePlayerNameChange}
+            />
+          ))}
         </ol>
         {(winner || hasDraw) &&
-          <GameOver winner={winner} onRestart={handleRestart} />
+          <GameOver winner={winner} onRestart={resetGame} />
         }
         <GameBoard
           onSelectSquare={handleSelectSquare}
@@ -121,7 +109,8 @@ function App() {
       </div>
       <Log turns={gameTurns} />
     </main>
-  )
+  );
 }
 
-export default App
+export default App;
+
