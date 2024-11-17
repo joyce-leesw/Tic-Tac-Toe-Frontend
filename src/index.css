@@ -12,17 +12,12 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+  background: url('/background-dark.jpg');
+  background-size: cover;
 }
 
 body {
-  background: radial-gradient(
-      circle at top,
-      var(--bright-orange),
-      var(--dark-orange)
-    );
-  background-repeat: repeat;
-  background-size: 100% 100%, 30% 30%, 100% 100%;
-  min-height: 110rem;
+  min-height: 80rem;
   font-family: 'MontserratMedium';
 }
 
@@ -30,18 +25,11 @@ header {
   text-align: center;
 }
 
-header img {
-  width: 8rem;
-  object-fit: contain;
-  margin: 3rem auto 1rem auto;
-  filter: drop-shadow(0 0 8px var(--black));
-}
-
 h1 {
   font-family: 'MontserratExtraBold';
   font-size: 7rem;
   margin: 2rem auto 3rem auto;
-  color: var(--dark-yellow);
+  color: var(--white);
 }
 
 #game-container {
@@ -49,8 +37,11 @@ h1 {
   margin: 3rem auto;
   padding: 2rem;
   border-radius: 6px;
-  background: linear-gradient(var(--darkest-yellow), var(--dark-green));
-  box-shadow: 0 0 20px var(--black);
+  background: var(--game-container);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(50px);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 20px var(--box-shadow);
   position: relative;
 }
 
@@ -89,10 +80,6 @@ h1 {
   text-align: center;
 }
 
-#players button:hover {
-  color: var(--bright-orange);
-}
-
 ol {
   list-style: none;
   margin: 0;
@@ -105,7 +92,7 @@ ol {
     box-shadow: 0 0 0 0 #f6e35a66;
   }
   50% {
-    border-color: var(--bright-orange);
+    border-color: var(--orange);
     box-shadow: 0 0 0 0.5rem #f8a53100;
   }
   100% {

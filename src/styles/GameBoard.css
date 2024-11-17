@@ -20,20 +20,26 @@
 #game-board button {
   width: 8rem;
   height: 8rem;
-  border: none;
-  background-color: var(--light-yellow);
-  color: var(--dark-yellow);
   font-size: 5rem;
   cursor: pointer;
   font-family: 'MontserratExtraBold', cursive;
   padding: 1rem;
   border-radius: 6px;
+  background: var(--border);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(50px);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 20px var(--box-shadow);
 }
 
 ol {
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+.player-symbol-board {
+  color: var(--white);
 }
 
 @media (max-width: 768px) {
@@ -47,6 +53,10 @@ ol {
 @media (max-width: 480px) {
   #game-board {
     margin: 1rem 0;
+  }
+
+  #game-board ol {
+    gap: 1.1rem;
   }
 
 	#game-board button {

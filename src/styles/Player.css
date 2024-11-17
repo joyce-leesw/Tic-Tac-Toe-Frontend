@@ -6,14 +6,14 @@
   display: inline-block;
   width: 10rem;
   font-size: 1rem;
-  color: var(--lightest-yellow);
+  color: var(--white);
   text-transform: uppercase;
   margin: 0;
   padding: 0.5rem;
   border-radius: 4px;
   text-overflow: ellipsis;
   text-align: center;
-  font-family: 'MontserratLight';
+  font-family: 'MontserratBold';
 }
 
 .player input {
@@ -23,7 +23,7 @@
   border: none;
   padding: 0.5rem;
   animation: pulse-text 2s infinite;
-  background-color: var(--grey);
+  background-color: transparent;
   text-align: center;
   text-transform: uppercase;
 }
@@ -31,7 +31,15 @@
 .player-symbol {
   margin-left: 1rem;
   font-size: 1rem;
-  color: var(--lightest-yellow);
+  color: var(--white);
+}
+
+#players .save-button {
+  color: var(--yellow);
+}
+
+#players .save-button:hover {
+  color: var(--pink);
 }
 
 #players.highlight-player li.active .player-name,
@@ -64,15 +72,19 @@
 }
 
 @media (max-width: 480px) {
-  .player-name {
-    display: inline;
-    width: 100%;
-    text-align: left;       
-  }
-
 	.player-name, .player input {
     width: 80%;
     font-size: 0.9rem;
+    display: inline;
+    text-align: left;
+  }
+
+  #players .save-button {
+    color: var(--yellow);
+  }
+
+  #players .save-button:hover {
+    color: var(--yellow);
   }
 }
 
