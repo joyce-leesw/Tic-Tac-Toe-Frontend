@@ -8,7 +8,8 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: var(--white);
+  background-color: var(--translucent-orange);
+  backdrop-filter: blur(10px);
   border-radius: 6px;
   animation: pop-in 0.5s cubic-bezier(0.68, -0.55, 0.65, 0.52) forwards;
 }
@@ -17,14 +18,14 @@
   font-family: 'MontserratMedium';
   font-size: 4rem;
   text-align: center;
-  color: var(--yellow);
+  color: var(--pink);
   margin: 0;
 }
 
 #game-over p {
   font-size: 2rem;
   text-align: center;
-  color: var(--lightest-yellow);
+  color: var(--white);
 }
 
 #game-over button {
@@ -32,8 +33,8 @@
   margin: 0 auto;
   font-size: 1.5rem;
   background: none;
-  border: 2px solid var(--yellow);
-  color: var(--yellow);
+  border: 2px solid var(--pink);
+  color: var(--pink);
   padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
@@ -42,7 +43,7 @@
 }
 
 #game-over button:hover {
-  background: var(--yellow);
+  background: var(--light-pink);
   color: var(--white);
   transform: scale(1.1);
   box-shadow: 0 0 20px var(--box-shadow);
