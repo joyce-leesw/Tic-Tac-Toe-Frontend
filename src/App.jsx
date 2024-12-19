@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Log from "./components/Log";
 import GameOver from "./components/GameOver";
 import axios from "axios";
+import Error from "./components/Error";
 
 const PLAYERS = {
   X: 'Player 1',
@@ -19,6 +20,7 @@ function App() {
   const [activePlayer, setActivePlayer] = useState('X');
   const [winner, setWinner] = useState(null);
   const [hasDraw, setHasDraw] = useState(false);
+  const [errors, setErrors] = useState();
 
   const resetGame =  async () => {
     try {
@@ -30,6 +32,7 @@ function App() {
       setActivePlayer('X');
     } catch (error) {
       console.error("Error resetting game:", error);
+      setErrors({ message: error.message || 'Failed to reset tic tac toe board.'})
     }
   };
 
@@ -56,7 +59,7 @@ function App() {
         column: colIndex
       });
       const { ai_move, winner, game_over } = data;
-      if (winner != 'AI') setWinner(winner);
+      if (winner && winner != 'AI') setWinner(players['X']);
       if (game_over) setHasDraw(!winner && game_over);
 
       setActivePlayer('O');
@@ -64,13 +67,14 @@ function App() {
       if (ai_move) {
         setTimeout(() => {
           handlePlayerMove(ai_move[0], ai_move[1], 'O');
-          if (winner) setWinner(winner);
+          if (winner) setWinner(players['O']);
           if (!winner && !game_over) setActivePlayer('X');
         }, 500);
       }
 
     } catch (error) {
       console.error("Error sending player move to server:", error);
+      setErrors({ message: error.message || 'Failed to play tic tac toe.'})
     }
   };
 
@@ -81,6 +85,10 @@ function App() {
     }));
   }
 
+  function handleError() {
+    setErrors(null);
+  }
+
   useEffect(() => {
     resetGame();
   }, []);
@@ -88,6 +96,9 @@ function App() {
   return (
     <main>
       <div id="game-container">
+        {errors && 
+          <Error title="An error has occurred!" message={errors.message} onConfirm={handleError}></Error>
+        }
         <ol id="players" className="highlight-player">
           {Object.keys(PLAYERS).map((symbol) => (
             <Player
